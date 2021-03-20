@@ -1786,7 +1786,7 @@ class CatBoost(_CatBoostBase):
                               pairs_weight=None, baseline=None, use_best_model=None, eval_set=None, verbose=None,
                               logging_level=None, plot=None, column_description=None, verbose_eval=None,
                               metric_period=None, silent=None, early_stopping_rounds=None, save_snapshot=None,
-                              snapshot_file=None, snapshot_interval=None, init_model=None):
+                              snapshot_file=None, snapshot_interval=None, init_model=None, callbacks=None):
         params = deepcopy(self._init_params)
         if params is None:
             params = {}
@@ -1841,6 +1841,9 @@ class CatBoost(_CatBoostBase):
 
         if snapshot_interval is not None:
             params['snapshot_interval'] = snapshot_interval
+        
+        if callbacks is not None:
+            params['callbacks'] = callbacks
 
         _check_param_types(params)
         params = _params_type_cast(params)
@@ -1904,7 +1907,7 @@ class CatBoost(_CatBoostBase):
     def _fit(self, X, y, cat_features, text_features, embedding_features, pairs, sample_weight, group_id, group_weight, subgroup_id,
              pairs_weight, baseline, use_best_model, eval_set, verbose, logging_level, plot,
              column_description, verbose_eval, metric_period, silent, early_stopping_rounds,
-             save_snapshot, snapshot_file, snapshot_interval, init_model):
+             save_snapshot, snapshot_file, snapshot_interval, init_model, callbacks):
 
         if X is None:
             raise CatBoostError("X must not be None")
@@ -1919,7 +1922,8 @@ class CatBoost(_CatBoostBase):
             eval_set=eval_set, verbose=verbose, logging_level=logging_level, plot=plot,
             column_description=column_description, verbose_eval=verbose_eval, metric_period=metric_period,
             silent=silent, early_stopping_rounds=early_stopping_rounds, save_snapshot=save_snapshot,
-            snapshot_file=snapshot_file, snapshot_interval=snapshot_interval, init_model=init_model
+            snapshot_file=snapshot_file, snapshot_interval=snapshot_interval, init_model=init_model,
+            callbacks=callbacks
         )
         params = train_params["params"]
         train_pool = train_params["train_pool"]
@@ -1954,7 +1958,7 @@ class CatBoost(_CatBoostBase):
             group_weight=None, subgroup_id=None, pairs_weight=None, baseline=None, use_best_model=None,
             eval_set=None, verbose=None, logging_level=None, plot=False, column_description=None,
             verbose_eval=None, metric_period=None, silent=None, early_stopping_rounds=None,
-            save_snapshot=None, snapshot_file=None, snapshot_interval=None, init_model=None):
+            save_snapshot=None, snapshot_file=None, snapshot_interval=None, init_model=None, callbacks=None):
         """
         Fit the CatBoost model.
 
@@ -2070,7 +2074,7 @@ class CatBoost(_CatBoostBase):
         return self._fit(X, y, cat_features, text_features, embedding_features, pairs, sample_weight, group_id, group_weight, subgroup_id,
                          pairs_weight, baseline, use_best_model, eval_set, verbose, logging_level, plot,
                          column_description, verbose_eval, metric_period, silent, early_stopping_rounds,
-                         save_snapshot, snapshot_file, snapshot_interval, init_model)
+                         save_snapshot, snapshot_file, snapshot_interval, init_model, callbacks)
 
     def _process_predict_input_data(self, data, parent_method_name, thread_count, label=None):
         if not self.is_fitted() or self.tree_count_ is None:
@@ -4444,7 +4448,8 @@ class CatBoostClassifier(CatBoost):
         dictionaries=None,
         feature_calcers=None,
         text_processing=None,
-        embedding_features=None
+        embedding_features=None,
+        callback=None
     ):
         params = {}
         not_params = ["not_params", "self", "params", "__class__"]
@@ -4457,7 +4462,7 @@ class CatBoostClassifier(CatBoost):
     def fit(self, X, y=None, cat_features=None, text_features=None, embedding_features=None, sample_weight=None, baseline=None, use_best_model=None,
             eval_set=None, verbose=None, logging_level=None, plot=False, column_description=None,
             verbose_eval=None, metric_period=None, silent=None, early_stopping_rounds=None,
-            save_snapshot=None, snapshot_file=None, snapshot_interval=None, init_model=None):
+            save_snapshot=None, snapshot_file=None, snapshot_interval=None, init_model=None, callbacks=None):
         """
         Fit the CatBoostClassifier model.
 
@@ -4549,7 +4554,7 @@ class CatBoostClassifier(CatBoost):
 
         self._fit(X, y, cat_features, text_features, embedding_features, None, sample_weight, None, None, None, None, baseline, use_best_model,
                   eval_set, verbose, logging_level, plot, column_description, verbose_eval, metric_period,
-                  silent, early_stopping_rounds, save_snapshot, snapshot_file, snapshot_interval, init_model)
+                  silent, early_stopping_rounds, save_snapshot, snapshot_file, snapshot_interval, init_model, callbacks)
         return self
 
     def predict(self, data, prediction_type='Class', ntree_start=0, ntree_end=0, thread_count=-1, verbose=None):
